@@ -131,6 +131,12 @@ class NaverPlaceRankSearch:
     
     def init_browser(self, force_reinit=False):
         """브라우저 초기화"""
+        import asyncio
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        except:
+            pass
         # 강제 재초기화 또는 page가 None이거나 스레드 문제가 있을 때 재초기화
         if force_reinit or self.page is None:
             # 기존 브라우저 정리
@@ -1121,6 +1127,12 @@ class NaverPlaceRankSearch:
                 "search_url": str
             } 또는 None (실패 시)
         """
+        import asyncio
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        except:
+            pass
         import sys
         print(f"[get_place_info] 메서드 호출됨: keyword={keyword}, place_name={place_name}, place_id={place_id}", file=sys.stderr, flush=True)
         try:
@@ -1903,6 +1915,13 @@ def api_check_ranks():
 
 def create_thread_local_browser():
     """스레드 로컬 브라우저 인스턴스 생성"""
+    import asyncio
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    except:
+        pass
+        
     try:
         playwright = sync_playwright().start()
         
