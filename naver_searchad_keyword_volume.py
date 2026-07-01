@@ -16,9 +16,9 @@ except ImportError:
     print("pandas 없음. 기본 출력만 사용.")
 
 # === 설정값 ===
-API_KEY = os.environ.get('NAVER_SEARCHAD_API_KEY', '0100000000522a213ece6cf38894977cc05cf6f964fd9faf8b9e2cdcf393d9ecb1290d68c9')  # 네이버 검색광고 API 키
-SECRET_KEY = os.environ.get('NAVER_SEARCHAD_SECRET_KEY', 'AQAAAADa+ZhviKqPxwWRvNl4Fuo6uhk2V3/o07I8QYQC5SOv4Q==')
-CUSTOMER_ID = os.environ.get('NAVER_SEARCHAD_CUSTOMER_ID', '3315879')  # 광고고객 ID
+API_KEY = os.environ.get('NAVER_SEARCHAD_API_KEY') or '0100000000522a213ece6cf38894977cc05cf6f964fd9faf8b9e2cdcf393d9ecb1290d68c9'  # 네이버 검색광고 API 키
+SECRET_KEY = os.environ.get('NAVER_SEARCHAD_SECRET_KEY') or 'AQAAAADa+ZhviKqPxwWRvNl4Fuo6uhk2V3/o07I8QYQC5SOv4Q=='
+CUSTOMER_ID = os.environ.get('NAVER_SEARCHAD_CUSTOMER_ID') or '3315879'  # 광고고객 ID
 BASE_URL = 'https://api.searchad.naver.com'
 URI = '/keywordstool'
 
