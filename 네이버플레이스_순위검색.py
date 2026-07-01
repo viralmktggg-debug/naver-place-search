@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote, urlparse
+import sys
 from playwright.sync_api import sync_playwright
 from flask import Flask, render_template, request, jsonify, send_file
 from threading import Thread, Lock
@@ -346,9 +347,9 @@ class NaverPlaceRankSearch:
         # JavaScript로 빠르게 모든 링크를 한 번에 수집하는 함수
         extract_links_js = """
         () => {
-            const links = Array.from(document.querySelectorAll('a.place_bluelink[href*="m.place.naver.com/place/"]'));
+            const links = Array.from(document.querySelectorAll('a.U70Fj, a.place_bluelink'));
             return links.map(link => ({
-                href: link.href,
+                href: link.href || link.getAttribute('href') || '',
                 title: (link.querySelector('span.YwYLL')?.textContent || link.textContent || '').trim()
             }));
         }
@@ -362,7 +363,7 @@ class NaverPlaceRankSearch:
                 links_data = self.page.evaluate(extract_links_js)
             except:
                 # JavaScript 실패 시 Playwright 방식으로 폴백
-                place_links = self.page.locator("a.place_bluelink[href*='m.place.naver.com/place/']").all()
+                place_links = self.page.locator("a.U70Fj, a.place_bluelink").all()
                 links_data = []
                 for link in place_links:
                     try:
@@ -1919,6 +1920,7 @@ def create_thread_local_browser():
     except:
         pass
         
+    playwright = None
     try:
         playwright = sync_playwright().start()
         
@@ -1987,6 +1989,11 @@ def create_thread_local_browser():
         
     except Exception as e:
         print(f"[스레드 로컬 브라우저 생성 실패] {str(e)}")
+        if playwright:
+            try:
+                playwright.stop()
+            except:
+                pass
         return None
 
 
@@ -2409,6 +2416,14 @@ def run_auto_schedule_search():
     print("=" * 60, file=sys.stderr, flush=True)
 
 
+# 백그라운드 자동 검색 스케줄러 등록 및 가동
+scheduler = BackgroundScheduler(daemon=True)
+scheduler.add_job(run_auto_schedule_search, 'cron', hour=2, minute=0, id='auto_search_0200')
+scheduler.add_job(run_auto_schedule_search, 'cron', hour=14, minute=0, id='auto_search_1400')
+scheduler.start()
+print("[스케줄러] 백그라운드 자동 검색 스케줄러 가동 성공! (02:00, 14:00 실행)", file=sys.stderr, flush=True)
+
+
 def main():
     """웹 서버 실행"""
     import sys
@@ -2445,13 +2460,6 @@ def main():
     
     print("템플릿 자동 리로드: 활성화", file=sys.stderr, flush=True)
     print("Jinja2 캐시: 비활성화 (cache_size=0)", file=sys.stderr, flush=True)
-    
-    # 백그라운드 자동 검색 스케줄러 등록 및 가동
-    scheduler = BackgroundScheduler(daemon=True)
-    scheduler.add_job(run_auto_schedule_search, 'cron', hour=2, minute=0, id='auto_search_0200')
-    scheduler.add_job(run_auto_schedule_search, 'cron', hour=14, minute=0, id='auto_search_1400')
-    scheduler.start()
-    print("[스케줄러] 백그라운드 자동 검색 스케줄러 가동 성공! (02:00, 14:00 실행)", file=sys.stderr, flush=True)
     
     # 클라우드 환경에서는 debug=False (gunicorn 사용 시)
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
