@@ -1,0 +1,12 @@
+.git
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.xlsx
+*.csv
+naver_place_rank_data.json
+Dockerfile
+.dockerignore
+.agents/
+.gemini/

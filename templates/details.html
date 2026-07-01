@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>플레이스 세부정보 리포트</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 32px 40px;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .report-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+        .report-meta {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 32px;
+            margin-top: 24px;
+            align-items: start;
+        }
+        .meta-left {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .meta-item {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            font-size: 15px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .meta-item:last-child {
+            border-bottom: none;
+        }
+        .meta-label {
+            font-weight: 600;
+            color: #374151;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        .meta-value {
+            color: #111827;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .meta-right {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            padding-left: 24px;
+            border-left: 2px solid #e5e7eb;
+        }
+        .stat-summary {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 15px;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+        .stat-summary strong {
+            color: #111827;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .charts-section {
+            margin-top: 32px;
+        }
+        .chart-container {
+            margin-bottom: 40px;
+        }
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-top: 16px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .link-section {
+            margin-top: 32px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .link-section a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-section a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title">플레이스 순위 체크 브랜딩 리포트</h1>
+            <div class="report-meta">
+                <div class="meta-left">
+                    <div class="meta-item">
+                        <span class="meta-label">검색 키워드</span>
+                        <span class="meta-value" id="keyword-value">{{ keyword }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">업체명/URL</span>
+                        <span class="meta-value" id="place-name-value">{{ place_name }}</span>
+                    </div>
+                    {% if place_id %}
+                    <div class="meta-item">
+                        <span class="meta-label">Place ID</span>
+                        <span class="meta-value" id="place-id-value">{{ place_id }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="meta-right">
+                    <div class="stat-summary">
+                        <strong id="current-save-count">{{ save_count or '정보 없음' }}</strong>
+                        <span>저장</span>
+                    </div>
+                    <div class="stat-summary">
+                        <strong id="current-visitor-reviews">{{ visitor_review_count or '정보 없음' }}</strong>
+                        <span>방문자 리뷰</span>
+                    </div>
+                    <div class="stat-summary">
+                        <strong id="current-blog-reviews">{{ blog_review_count or '정보 없음' }}</strong>
+                        <span>블로그 리뷰</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            {% if has_rankings %}
+            <div class="chart-container">
+                <h2 class="chart-title">순위</h2>
+                <div class="chart-wrapper">
+                    <canvas id="rankChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="chart-container">
+                <h2 class="chart-title">저장 수</h2>
+                <div class="chart-wrapper">
+                    <canvas id="saveCountChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="chart-title">리뷰</h2>
+                <div class="chart-wrapper">
+                    <canvas id="reviewsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {% if search_url %}
+        <div class="link-section">
+            <strong>네이버 플레이스 검색 페이지:</strong><br>
+            <a href="{{ search_url }}" target="_blank" rel="noopener noreferrer">{{ search_url }}</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const placeId = '{{ place_id }}';
+        const keyword = '{{ keyword }}';
+        const hasRankings = {{ 'true' if has_rankings else 'false' }};
+        
+        if (!placeId) {
+            document.querySelectorAll('.chart-wrapper').forEach(wrapper => {
+                wrapper.innerHTML = '<div class="no-data">Place ID가 없어 그래프를 표시할 수 없습니다.</div>';
+            });
+        } else {
+            // 날짜별 세부정보 조회
+            fetch(`/api/place_details_history?place_id=${encodeURIComponent(placeId)}&keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const details = data.details || [];
+                        const rankings = data.rankings || [];
+                        if (details.length > 0 || rankings.length > 0) {
+                            renderCharts(details, rankings);
+                        } else {
+                            document.querySelectorAll('.chart-wrapper').forEach(wrapper => {
+                                wrapper.innerHTML = '<div class="no-data">아직 저장된 데이터가 없습니다. 세부정보를 조회하면 매일 기록됩니다.</div>';
+                            });
+                        }
+                    } else {
+                        document.querySelectorAll('.chart-wrapper').forEach(wrapper => {
+                            wrapper.innerHTML = '<div class="no-data">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('데이터 조회 오류:', error);
+                    document.querySelectorAll('.chart-wrapper').forEach(wrapper => {
+                        wrapper.innerHTML = '<div class="no-data">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+                    });
+                });
+        }
+
+        function renderCharts(details, rankings) {
+            // 날짜 정렬 (빠른 정렬)
+            if (details.length > 0) {
+                details.sort((a, b) => a.date.localeCompare(b.date));
+            }
+            if (rankings.length > 0) {
+                rankings.sort((a, b) => a.date.localeCompare(b.date));
+            }
+            
+            // 날짜 포맷팅 (MM-DD)
+            const labels = details.map(d => {
+                const date = new Date(d.date);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${month}-${day}`;
+            });
+            
+            // 순위 차트 (순위 데이터가 있는 경우)
+            if (rankings && rankings.length > 0) {
+                const rankLabels = rankings.map(r => {
+                    const date = new Date(r.date);
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${month}-${day}`;
+                });
+                const rankValues = rankings.map(r => r.rank || null);
+                
+                const rankCtx = document.getElementById('rankChart');
+                if (rankCtx) {
+                    new Chart(rankCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: rankLabels,
+                            datasets: [{
+                                label: '순위',
+                                data: rankValues,
+                                borderColor: 'rgba(139, 92, 246, 1)',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return '순위: ' + (context.parsed.y || '-') + '위';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    reverse: true, // 순위는 낮을수록 좋으므로 역순
+                                    beginAtZero: false,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + '위';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } else if (details.length === 0) {
+                // 순위 데이터만 있고 세부정보가 없는 경우
+                document.getElementById('saveCountChart').parentElement.innerHTML = '<div class="no-data">아직 저장 수 데이터가 없습니다.</div>';
+                document.getElementById('reviewsChart').parentElement.innerHTML = '<div class="no-data">아직 리뷰 데이터가 없습니다.</div>';
+            }
+            
+            // 저장 수 차트
+            const saveCountData = details.map(d => d.saveCount || 0);
+            const saveCountCtx = document.getElementById('saveCountChart').getContext('2d');
+            new Chart(saveCountCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '저장 수',
+                        data: saveCountData,
+                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '저장 수: ' + (context.parsed.y || 0).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 리뷰 차트 (스택 바)
+            const visitorReviewData = details.map(d => d.visitorReviewCount || 0);
+            const blogReviewData = details.map(d => d.blogReviewCount || 0);
+            const reviewsCtx = document.getElementById('reviewsChart').getContext('2d');
+            new Chart(reviewsCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '방문자 리뷰',
+                            data: visitorReviewData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '블로그 리뷰',
+                            data: blogReviewData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y || 0;
+                                    return label + ': ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
