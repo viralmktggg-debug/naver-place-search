@@ -587,31 +587,64 @@
                 </div>
             </div>
             
-            <div class="input-section">
-                <div class="form-group">
-                    <label for="placeId">매장 Place ID</label>
-                    <input type="text" id="placeId" placeholder="예: 1234567890">
+            <div class="input-section-split" style="display: flex; gap: 24px; margin-bottom: 20px; flex-wrap: wrap;">
+                <!-- 좌측: 입력 폼 (1/3 너비) -->
+                <div class="input-form-left" style="flex: 1 1 30%; min-width: 280px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="placeId" style="font-weight: 600; margin-bottom: 6px; display: block; font-size: 13px; color: #4a5568;">매장 Place ID</label>
+                        <input type="text" id="placeId" placeholder="예: 2073934125" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="keywords" style="font-weight: 600; margin-bottom: 6px; display: block; font-size: 13px; color: #4a5568;">검색 키워드</label>
+                        <input type="text" id="keywords" placeholder="예: 두정동술집" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                        <small style="color: #a0aec0; font-size: 11px; margin-top: 4px; display: block;">여러 개는 쉼표로 구분 (또는 그룹의 키워드 사용)</small>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="maxRank" style="font-weight: 600; margin-bottom: 6px; display: block; font-size: 13px; color: #4a5568;">최대 순위</label>
+                        <input type="number" id="maxRank" value="300" min="1" max="1000" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="keywords">검색 키워드</label>
-                    <input type="text" id="keywords" placeholder="예: 대구맛집, 대구카페, 대구데이트">
-                    <small>여러 개는 쉼표로 구분하세요 (또는 그룹의 키워드 사용)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="maxRank">최대 순위</label>
-                    <input type="number" id="maxRank" value="300" min="1" max="1000">
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn-primary" id="searchBtn" onclick="startSearch()">순위 확인</button>
-                    <button class="btn-secondary" onclick="clearResults()">결과 초기화</button>
-                    <button class="btn-success" onclick="downloadCSV()">CSV 저장</button>
-                    <button class="btn-secondary" onclick="loadRankingsHistory()">순위 이력 보기</button>
-                    <button class="btn-secondary" onclick="updateKeywordMobileVolumes()">월간 검색어(모바일) 조회수 갱신</button>
-                    <button class="btn-secondary" onclick="document.getElementById('excelFileInput').click()">엑셀 불러오기</button>
-                    <input type="file" id="excelFileInput" accept=".xlsx,.xls" multiple style="display: none;" onchange="importExcelFile(event)">
+                <!-- 우측: 6개 버튼 및 설명 그리드 (2/3 너비) -->
+                <div class="button-grid-right" style="flex: 2 1 60%; min-width: 320px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                    <!-- 버튼 카드 1 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-primary" id="searchBtn" onclick="startSearch()" style="width: 100%; padding: 10px; font-weight: 600; cursor: pointer; border-radius: 6px;">순위 확인</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">실시간으로 플레이스 순위를 즉시 조회합니다.</span>
+                    </div>
+                    
+                    <!-- 버튼 카드 2 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-secondary" onclick="clearResults()" style="width: 100%; padding: 10px; font-weight: 600; cursor: pointer; border-radius: 6px;">결과 초기화</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">화면에 로드된 순위 카드들을 초기화합니다.</span>
+                    </div>
+                    
+                    <!-- 버튼 카드 3 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-success" onclick="downloadCSV()" style="width: 100%; padding: 10px; font-weight: 600; color: #fff; background-color: #28a745; border: none; border-radius: 6px; cursor: pointer;">CSV 저장</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">현재 조회된 데이터를 엑셀(CSV)로 내려받습니다.</span>
+                    </div>
+                    
+                    <!-- 버튼 카드 4 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-secondary" onclick="loadRankingsHistory()" style="width: 100%; padding: 10px; font-weight: 600; cursor: pointer; border-radius: 6px;">순위 이력 보기</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">수집된 과거 날짜별 순위 변화를 팝업으로 봅니다.</span>
+                    </div>
+                    
+                    <!-- 버튼 카드 5 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-secondary" onclick="updateKeywordMobileVolumes()" style="width: 100%; padding: 10px; font-weight: 600; cursor: pointer; border-radius: 6px;">월간 검색어(모바일) 조회수 갱신</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">네이버 광고 API를 통해 한 달 검색량을 가져옵니다.</span>
+                    </div>
+                    
+                    <!-- 버튼 카드 6 -->
+                    <div class="btn-desc-card" style="background: #fff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <button class="btn-secondary" onclick="document.getElementById('excelFileInput').click()" style="width: 100%; padding: 10px; font-weight: 600; cursor: pointer; border-radius: 6px;">엑셀 불러오기</button>
+                        <span style="font-size: 11px; color: #718096; line-height: 1.4;">매장 및 키워드가 저장된 엑셀 파일을 일괄 로드합니다.</span>
+                        <input type="file" id="excelFileInput" accept=".xlsx,.xls" multiple style="display: none;" onchange="importExcelFile(event)">
+                    </div>
                 </div>
             </div>
             
@@ -624,12 +657,13 @@
             
             <div class="results-section">
                 <div class="results-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px;">
-                    <h2>키워드별 순위 현황</h2>
+                    <h2>키워드별 순위 현황 <span id="visibleCardsCount" style="font-size: 13px; font-weight: normal; color: #718096; margin-left: 8px;"></span></h2>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <label for="pageSizeSelect" style="font-size: 13px; margin-right: 5px;">표시 개수:</label>
                         <select id="pageSizeSelect" style="padding: 6px 10px; font-size: 13px; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer;" onchange="changePageSize()">
+                            <option value="20" selected>20개</option>
                             <option value="50">50개</option>
-                            <option value="100" selected>100개</option>
+                            <option value="100">100개</option>
                             <option value="300">300개</option>
                             <option value="500">500개</option>
                             <option value="1000">1000개</option>
@@ -640,6 +674,18 @@
                         <button class="btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="reSearchSelectedCards()">
                             선택 항목 재검색
                         </button>
+                    </div>
+                </div>
+                
+                <!-- 실시간 검색 필터링 영역 -->
+                <div class="search-filters-container" style="display: flex; gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 240px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 13px; font-weight: 600; color: #4a5568; white-space: nowrap;">🏢 매장명 검색:</span>
+                        <input type="text" id="placeNameSearchInput" placeholder="매장명을 입력하세요 (실시간 필터)..." style="flex: 1; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; box-sizing: border-box;" oninput="applyPageSizeFilter()">
+                    </div>
+                    <div style="flex: 1; min-width: 240px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 13px; font-weight: 600; color: #4a5568; white-space: nowrap;">🔑 키워드 검색:</span>
+                        <input type="text" id="keywordSearchInput" placeholder="순위 키워드를 입력하세요 (실시간 필터)..." style="flex: 1; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 13px; box-sizing: border-box;" oninput="applyPageSizeFilter()">
                     </div>
                 </div>
                 <div id="cardsContainer" class="cards-container">
@@ -657,7 +703,7 @@
         let searchInterval = null;
         let reSearchActive = false;
         let reSearchContext = null; // { groupName, keyword }
-        let pageSize = 100; // 기본 표시 개수
+        let pageSize = 20; // 기본 표시 개수
         // 카드 데이터 캐시: 불필요한 재로딩 방지 및 네트워크 호출 최소화
         const cardDataCache = new Map(); // key: `${group}::${keyword}` => data
         const cardKey = (group, keyword) => `${group}::${keyword}`;
@@ -1503,7 +1549,7 @@
         window.changePageSize = function() {
             const select = document.getElementById('pageSizeSelect');
             if (select) {
-                pageSize = parseInt(select.value) || 100;
+                pageSize = parseInt(select.value) || 20;
                 applyPageSizeFilter();
             }
         }
@@ -1517,44 +1563,66 @@
             const groupSelect = document.getElementById('groupSelect');
             const selectedGroup = groupSelect ? groupSelect.value : '';
             
+            // 실시간 검색어 확인
+            const placeSearchInput = document.getElementById('placeNameSearchInput');
+            const placeSearchVal = placeSearchInput ? placeSearchInput.value.trim().toLowerCase() : '';
+            
+            const keywordSearchInput = document.getElementById('keywordSearchInput');
+            const keywordSearchVal = keywordSearchInput ? keywordSearchInput.value.trim().toLowerCase() : '';
+            
             // 모든 카드 가져오기
             const allCards = Array.from(container.querySelectorAll('.rank-card'));
-            
             if (allCards.length === 0) return;
             
-            // 현재 선택된 그룹에 해당하는 카드만 필터링
-            let targetCards = allCards;
-            if (selectedGroup) {
-                // 특정 그룹이 선택된 경우, 해당 그룹의 카드만 고려
-                targetCards = allCards.filter(card => {
-                    return card.getAttribute('data-group') === selectedGroup;
-                });
-            }
+            // 1단계: 조건 필터링 (그룹 매칭 + 매장명 검색 + 키워드 검색)
+            const filteredCards = allCards.filter(card => {
+                // 그룹 매칭
+                const groupMatch = !selectedGroup || card.getAttribute('data-group') === selectedGroup;
+                
+                // 매장명 매칭
+                const placeName = (card.getAttribute('data-place-name') || '').toLowerCase();
+                const placeMatch = !placeSearchVal || placeName.includes(placeSearchVal);
+                
+                // 키워드 매칭
+                const keyword = (card.getAttribute('data-keyword') || '').toLowerCase();
+                const keywordMatch = !keywordSearchVal || keyword.includes(keywordSearchVal);
+                
+                return groupMatch && placeMatch && keywordMatch;
+            });
             
             // 카드를 DOM 순서대로 정렬
-            const sortedCards = targetCards.sort((a, b) => {
+            const sortedCards = filteredCards.sort((a, b) => {
                 const aIndex = Array.from(container.children).indexOf(a);
                 const bIndex = Array.from(container.children).indexOf(b);
                 return aIndex - bIndex;
             });
             
-            // 페이지 크기에 맞게 표시/숨김 처리
-            // 선택된 그룹의 카드만 페이지 크기 제한 적용
+            // 모든 카드를 일단 숨김 처리
+            allCards.forEach(card => {
+                card.style.display = 'none';
+            });
+            
+            // 2단계: 필터링 조건에 부합하고, 페이지 크기 이내인 카드만 표시
             let visibleCount = 0;
             sortedCards.forEach((card) => {
                 if (visibleCount < pageSize) {
                     card.style.display = '';
                     visibleCount++;
-                } else {
-                    card.style.display = 'none';
                 }
             });
             
-            // 다른 그룹의 카드는 이미 숨겨져 있으므로 건드리지 않음
-            // (전체 그룹 선택 시에는 위에서 이미 처리됨)
-            
             // 표시된 카드 개수 정보 업데이트
             updateCardCountInfo();
+            
+            // 헤더의 visibleCardsCount 라벨 업데이트
+            const visibleLabel = document.getElementById('visibleCardsCount');
+            if (visibleLabel) {
+                if (placeSearchVal || keywordSearchVal || selectedGroup) {
+                    visibleLabel.textContent = `(필터링 결과: ${filteredCards.length}개 / 전체: ${allCards.length}개)`;
+                } else {
+                    visibleLabel.textContent = `(전체: ${allCards.length}개)`;
+                }
+            }
         }
         
         // 카드 개수 정보 표시
