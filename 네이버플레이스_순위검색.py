@@ -133,8 +133,7 @@ class NaverPlaceRankSearch:
         """브라우저 초기화"""
         import asyncio
         try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            asyncio.set_event_loop(None)
         except:
             pass
         # 강제 재초기화 또는 page가 None이거나 스레드 문제가 있을 때 재초기화
@@ -1129,8 +1128,7 @@ class NaverPlaceRankSearch:
         """
         import asyncio
         try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            asyncio.set_event_loop(None)
         except:
             pass
         import sys
@@ -1917,8 +1915,7 @@ def create_thread_local_browser():
     """스레드 로컬 브라우저 인스턴스 생성"""
     import asyncio
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        asyncio.set_event_loop(None)
     except:
         pass
         
